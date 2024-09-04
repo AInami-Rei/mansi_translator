@@ -1,11 +1,10 @@
-name: Build and Push Docker Image to Docker Hub
+name: Test Build
 
 on:
-  workflow_run:
-    workflows: ["Test Build"]
-    types:
-      - completed
   push:
+    branches: [ "dev", "main" ]
+
+  pull_request:
     branches: [ "dev", "main" ]
 
 env:
@@ -35,5 +34,4 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}:${{ github.run_number }}
+          push: false
