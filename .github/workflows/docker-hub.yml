@@ -2,9 +2,7 @@ name: Build and Push Docker Image to Docker Hub
 
 on:
   push:
-    branches: [ "feature/cicd", "dev", "main" ]
-  pull_request:
-    branches: [ "feature/cicd", "dev", "main" ]
+    branches: [ "dev", "main" ]
 
 env:
   # Use docker.io for Docker Hub if empty
