@@ -63,11 +63,11 @@ const TranslationBox = () => {
   };
 
   const handleKeyboardKeyPress = (key) => {
-    setInputText(inputText + key);
+    handleInputChange(inputText + key);
   }
 
   const handleKeyboardBackspace = () => {
-    setInputText(inputText.slice(0, -1));
+    handleInputChange(inputText.slice(0, -1));
   }
 
   return (
