@@ -1,8 +1,8 @@
 import os
-import csv
 import fitz
 import re
-import requests
+
+from parsing.pdf.utils import download_pdf, write_to_csv
 
 
 BOOK_URL = "https://ouipiir.ru/sites/default/files/pesni_hulimsunt.pdf"
@@ -103,25 +103,11 @@ def parse_pdf(file_path):
     return result
 
 
-def download_pdf(url):
-    response = requests.get(url)
-    with open(INPUT_FILE_PATH, "wb") as file:
-        file.write(response.content)
-
-
-def write_to_csv(result):
-    with open(OUTPUT_FILE_PATH, "w") as f:
-        csvwriter = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
-        csvwriter.writerow(["source", "target"])
-        for source, target in result:
-            csvwriter.writerow([source, target])
-
-
 def main():
     if not os.path.exists(INPUT_FILE_PATH):
-        download_pdf(BOOK_URL)
+        download_pdf(INPUT_FILE_PATH, BOOK_URL)
     result = parse_pdf(INPUT_FILE_PATH)
-    write_to_csv(result)
+    write_to_csv(OUTPUT_FILE_PATH, result)
     print(f"Wrote {len(result)} rows to {OUTPUT_FILE_PATH}")
     not_mapped_chars = non_standart_chars - non_standart_chars_mapping.keys()
     if not_mapped_chars:
