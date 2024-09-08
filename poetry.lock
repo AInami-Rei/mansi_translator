@@ -752,6 +752,8 @@ files = [
     {file = "PyMuPDFb-1.24.10-py3-none-win_amd64.whl", hash = "sha256:27ea65c701608b6b7632703339ca33ea6d513843b26dbe9bdefb2f56f7b9b196"},
     {file = "PyMuPDFb-1.24.10.tar.gz", hash = "sha256:007b91fa9b528c5c0eecea2e49c486ac02e878274f9e31522bdd948adc5f8327"},
 ]
+
+[[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
 description = "Extensions to the standard Python datetime module"
@@ -1005,8 +1007,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-<<<<<<< HEAD
-content-hash = "6af7c91a143b0896cfcc46d880ad7841841e8c537d4a202b721b75019cb32e28"
-=======
-content-hash = "dc152f178a530cf0657458a89a8b80b06c1fcb57f10ea2501cf3b30862d32052"
->>>>>>> 9ca30dc (feat: add pandas)
+content-hash = "3c15f6d513022b574c4500da5aa410a98d58cd2d1b6d4dceea8d519cd0678458"
