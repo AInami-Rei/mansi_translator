@@ -1,4 +1,4 @@
-name: Build and Push Docker Image to Docker Hub
+name: Build and Push Docker Images to Docker Hub
 
 on:
   workflow_run:
@@ -14,7 +14,7 @@ env:
 jobs:
 
   build:
-    name: Push Docker image to Docker Hub
+    name: Build and Push Docker images to Docker Hub
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
