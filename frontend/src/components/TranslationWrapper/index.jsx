@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import TextInput from '../TextInput';
+import Keyboard from '../Keyboard';
 import styles from './index.module.scss'
 import SwapLanguagesButton from '../SwapLanguagesButton';
 import { debounce } from 'lodash';
@@ -61,6 +62,14 @@ const TranslationBox = () => {
     setTranslation('');
   };
 
+  const handleKeyboardKeyPress = (key) => {
+    handleInputChange(inputText + key);
+  }
+
+  const handleKeyboardBackspace = () => {
+    handleInputChange(inputText.slice(0, -1));
+  }
+
   return (
     <div className={styles.translationBox}>
       <div className={styles.header}>
@@ -87,7 +96,12 @@ const TranslationBox = () => {
           onClear={handleCopy}
         />
       </div>
-      
+
+      <Keyboard
+        isOpen // TODO by button
+        onKeyPress={handleKeyboardKeyPress}
+        onBackspace={handleKeyboardBackspace}
+      />
     </div>
   );
 };
