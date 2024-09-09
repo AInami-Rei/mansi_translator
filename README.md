@@ -19,5 +19,29 @@ docker pull darrrinka/translator:latest
 docker run -d -p 8000:8000 --env-file .env darrrinka/translator:latest
 ```
 
+# Деплой
+Для начала:
+```
+git clone <this repo>
+cd <this repo directory>
+```
+
+Установить nginx, затем:
+```
+cp .deploy/nginx.conf /etc/nginx/sites-enabled/site.conf
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+Заполнить файл .env, а затем запустить docker compose:
+```
+cp .env.example .env
+echo DOCKER_USERNAME=<your docker username> > .env
+echo DOCKER_IMAGE=<your docker repository> > .env
+echo DOCKER_FRONTEND_IMAGE=<your docker frontend repository> > .env
+source .env
+docker compose -f .deploy/docker-compose.yml up -d
+```
+
 # Лицензия
 Этот репозиторий имеет лицензию GPL-2.0. Подробности можно найти в файле [LICENSE](https://github.com/AInami-Rei/mansi_translator/blob/dev/LICENSE).
