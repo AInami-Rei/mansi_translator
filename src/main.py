@@ -29,7 +29,7 @@ def translate(request: TranslateRequest, settings: Settings = Depends(get_settin
     headers = {"accept": "application/json"}
     url = settings.url + f"/translate/{request.source_lang}-{request.target_lang}"
     response = requests.post(url, params=params, headers=headers).json()
-    print(response)
+
     answer = TranslateResponse(
         text=response["translation"],
         original_text=request.text,
