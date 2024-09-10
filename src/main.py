@@ -1,7 +1,6 @@
-from fastapi import FastAPI, HTTPException, Depends
-from datetime import datetime
+from fastapi import FastAPI, Depends
 from src.base_models import TranslateRequest, TranslateResponse, Settings
-
+import requests
 
 app = FastAPI()
 settings = Settings()
@@ -18,21 +17,26 @@ def get_settings() -> Settings:
 
 @app.post("/translate", response_model=TranslateResponse)
 def translate(request: TranslateRequest, settings: Settings = Depends(get_settings)):
-    if request.model not in settings.models:
-        raise HTTPException(status_code=400, detail="Model not supported")
+    if request.source_lang == request.target_lang:
+        return TranslateResponse(
+            text=request.text,
+            original_text=request.text,
+            source_lang=request.source_lang,
+            target_lang=request.target_lang,
+        )
 
-    # Заглушка для перевода
-    translated_text = "123"
-
-    response = TranslateResponse(
-        text=translated_text,
-        time=datetime.now(),
-        model=request.model,
-        temp=settings.temperature,
+    params = {"text": request.text}
+    headers = {"accept": "application/json"}
+    url = settings.url + f"/translate/{request.source_lang}-{request.target_lang}"
+    response = requests.post(url, params=params, headers=headers).json()
+    print(response)
+    answer = TranslateResponse(
+        text=response["translation"],
+        original_text=request.text,
         source_lang=request.source_lang,
         target_lang=request.target_lang,
     )
-    return response
+    return answer
 
 
 @app.get("/config")
