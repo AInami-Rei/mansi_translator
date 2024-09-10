@@ -14,22 +14,27 @@ docker compose up
 ```
 
 # Деплой
+Установить:
+- nginx
+- docker (и compose плагин)
+
 Для начала нужно склонировать репозиторий:
 ```
 git clone https://github.com/AInami-Rei/mansi_translator
 cd mansi_translator
 ```
 
-Установить nginx, затем:
+Затем:
 ```
 cp .deploy/nginx.conf /etc/nginx/sites-enabled/site.conf
+sudo rm /etc/nginx/sites-enabled/default
 sudo nginx -t
 sudo systemctl restart nginx
 ```
 
 Заполнить файл `.env`, а затем запустить `docker compose`:
 ```
-cp .env.example .env
+cp example.env .deploy/.env
 
 echo DOCKER_USERNAME=darrrinka > .env
 echo DOCKER_IMAGE=translator > .env
@@ -38,7 +43,7 @@ echo DOCKER_FRONTEND_IMAGE=translator-frontend > .env
 echo DOCKER_FRONTEND_IMAGE_TAG=latest > .env
 echo URL=<url, где находится бэкенд модели> >> .env
 
-source .env
+source .deploy/.env
 
 docker compose -f .deploy/docker-compose.yml up -d
 ```
