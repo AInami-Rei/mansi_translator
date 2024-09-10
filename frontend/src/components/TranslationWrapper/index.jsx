@@ -4,27 +4,35 @@ import Keyboard from '../Keyboard';
 import styles from './index.module.scss'
 import SwapLanguagesButton from '../SwapLanguagesButton';
 import { debounce } from 'lodash';
+import {observer} from 'mobx-react-lite'
+import { useStores } from "../../stores/rootStore";
+
 
 const MAX_CHAR_LIMIT = 250;
 
 const placeholders = {"Русский": "Введите текст", "Мансийский": "Несов текст"}
 
-const TranslationBox = () => {
+const TranslationBox = observer(() => {
   const [inputText, setInputText] = useState('');
   const [translation, setTranslation] = useState('');
   const [languages, setLanguages] = useState({
     from: 'Русский',
     to: 'Мансийский'
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Функция для перевода текста (заменить на реальный API запрос)
-  const handleTranslate = (text) => {
+  const {keyboardStore} = useStores()
+
+  const handleTranslate = async (text) => {
+    setTranslation('');
+    setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 2000))
     console.log('Запрос на перевод:', text);
-    // Пример результата перевода, который вы могли бы получить от API
     setTranslation('Павыл ворт унли. Ман вор павылт олэв.');
+    setIsLoading(false);
   };
 
-  const debouncedTranslate = useMemo(() => debounce(handleTranslate, 2000), []);
+  const debouncedTranslate = useMemo(() => debounce(handleTranslate, 1000), []);
 
   const handleInputChange = (text) => {
     setInputText(text);
@@ -55,9 +63,12 @@ const TranslationBox = () => {
       to: languages.from
     });
     setTranslation('');
+    setInputText('')
   };
 
   const handleClearInput = () => {
+    debouncedTranslate.cancel();
+    setIsLoading(false);
     setInputText('');
     setTranslation('');
   };
@@ -70,7 +81,10 @@ const TranslationBox = () => {
     handleInputChange(inputText.slice(0, -1));
   }
 
+  const onKeyboardClick = () => keyboardStore.setIsOpen(!keyboardStore.isOpen)
+
   return (
+    <>
     <div className={styles.translationBox}>
       <div className={styles.header}>
         <SwapLanguagesButton onClick={handleSwapLanguages} />
@@ -84,6 +98,7 @@ const TranslationBox = () => {
           value={inputText}
           onChange={handleInputChange}
           onClear={handleClearInput}
+          onKeyboardClick={onKeyboardClick}
           charCount={inputText.length}
           maxChars={MAX_CHAR_LIMIT}
           placeholder={placeholders[languages.from]}
@@ -94,16 +109,16 @@ const TranslationBox = () => {
           className={styles.targetLang}
           value={translation}
           onClear={handleCopy}
+          isLoading={isLoading}
         />
       </div>
-
-      <Keyboard
-        isOpen // TODO by button
-        onKeyPress={handleKeyboardKeyPress}
-        onBackspace={handleKeyboardBackspace}
-      />
     </div>
+    {keyboardStore.isOpen && <Keyboard
+      onKeyPress={handleKeyboardKeyPress}
+      onBackspace={handleKeyboardBackspace}
+    />}
+    </>
   );
-};
+});
 
 export default TranslationBox;

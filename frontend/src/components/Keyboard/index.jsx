@@ -1,6 +1,8 @@
 import React, {useState, useMemo} from 'react';
 import RSKeyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
+import styles from './index.module.scss';
+import cn from 'classnames';
 
 const customLayout = {
   default: [
@@ -33,15 +35,15 @@ const customLayout = {
   ],
 };
 
-// TODO styles
-
 const Keyboard = ({
-  isOpen=true,
   onKeyPress=()=>{},
   onBackspace=()=>{},
+  className=''
 }) => {
   const [isShift, setIsShift] = useState(false);
   const [isAlt, setIsAlt] = useState(false);
+
+  const keyboardClass = cn(styles.keyboard, className)
 
   const handleShift = () => {
     setIsShift(!isShift);
@@ -82,7 +84,7 @@ const Keyboard = ({
   }, [isShift, isAlt]);
 
   return (
-    <div style={{ display: isOpen ? 'block' : 'none' }}>
+    <div className={keyboardClass}>
       <RSKeyboard
         layout={customLayout}
         layoutName={layoutName}
