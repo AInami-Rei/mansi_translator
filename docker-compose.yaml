@@ -6,3 +6,11 @@ services:
     ports:
       - "8000:8000"
     env_file: .env
+  frontend:
+    build:
+      context: frontend
+      target: build
+    command: npm run start
+    ports:
+      - "3000:3000"
+    env_file: .env

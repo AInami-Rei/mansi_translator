@@ -10,7 +10,7 @@ COPY . .
 
 RUN npm run build
 
-FROM nginx:alpine
+FROM nginx:alpine AS run_prod
 
 COPY --from=build /app/build /usr/share/nginx/html
 
