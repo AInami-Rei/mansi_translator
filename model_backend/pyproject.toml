@@ -6,15 +6,18 @@ authors = ["Timur Smirnov <smrtmr@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "3.11.10"
 ray = {extras = ["serve"], version = "^2.35.0"}
 torch = "2.2.2"
-transformers = "4.39.3"
+transformers = "4.44.2"
 sentencepiece = "0.2.0"
 opencensus = "0.11.4"
 sacremoses = "0.1.1"
 pydantic-settings = "^2.2.1"
 fastapi = "^0.114.0"
+accelerate = "^0.34.2"
+bitsandbytes = "^0.43.3"
+numpy = "1.22.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "8.0.2"
