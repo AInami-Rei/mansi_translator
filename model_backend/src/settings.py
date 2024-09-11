@@ -13,6 +13,10 @@ class MySettings(BaseSettings):
 class ServiceSettings(MySettings):
     default_device: str = Field("cuda:0")
     ms_ru_model_maxlen: int = 256
-    ms_ru_model_name: str = Field(default="/home/darinka/translator/translator/test/mbart-600m-v1")
+    ms_ru_model_name: str = Field(
+        default="/home/darinka/translator/translator/test/mbart-600m-v1"
+    )
     ru_ms_model_maxlen: int = 256
-    ru_ms_model_name: str = Field(default="/home/darinka/translator/translator/test/mbart-600m-v1")
+    ru_ms_model_name: str = Field(
+        default="/home/darinka/translator/translator/test/mbart-600m-v1"
+    )
