@@ -17,6 +17,12 @@ class TranslationResult(BaseModel):
     translation: str
 
 
+def preprocess(text: str):
+    if text[-1] == "." or text[-1] == "?" or text[-1] == "!":
+        return text
+    return text + "."
+
+
 def init_model_tokenizer(model_name: str, device: str):
     model = MBartForConditionalGeneration.from_pretrained(
         model_name,
@@ -111,7 +117,7 @@ class Translator:
         model_output = gen_translate(
             model=self.models[direction],
             tokenizer=self.tokenizers[direction],
-            text=text,
+            text=preprocess(text),
             src=self.rutok if direction == "ru_ms" else self.mansitok,
             trg=self.rutok if direction == "ms_ru" else self.mansitok,
             max_length=self.maxlen[direction],
