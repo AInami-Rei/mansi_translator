@@ -3,4 +3,8 @@
     position: absolute;
     bottom: 0;
     width: 800px;
+
+    @media (max-width: 857px) {
+        width: 80vw;
+    }
 }

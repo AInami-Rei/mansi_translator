@@ -16,6 +16,12 @@
             background-color: #EAEAEA;
             color: inherit;
         }
+        
+
+        @media (max-width: 452px) {
+            flex-direction: column;
+            width:80vw;
+        }
     }
 
     .charCount {
@@ -34,7 +40,8 @@
         right: 15px;
         border: none;
         cursor: pointer;
-        font-size: 3vh;
+        font-size: 15pt;
+        font-weight: bold;
         color: #575555;
     }
 
@@ -49,6 +56,14 @@
         .copyIcon {
             width: 15px;
             height: 15px;
+        }
+
+        &:hover {
+            opacity: 70%;
+        }
+
+        &:active {
+            opacity: 90%;
         }
     }
 

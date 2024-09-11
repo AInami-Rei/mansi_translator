@@ -1,14 +1,19 @@
 import React from 'react';
 import { FiRefreshCw } from 'react-icons/fi';
+import cn from 'classnames';
 
 import styles from './index.module.scss';
 
 
-const TextInput = ({ value, onChange=()=>{}, onClear=()=>{}, onKeyboardClick=()=>{}, maxLength=250, isSource=false, isLoading=false, placeholder=''}) => {
+const TextInput = ({ value, className, onChange=()=>{}, onClear=()=>{}, onKeyboardClick=()=>{}, maxLength=250, isSource=false, isLoading=false, placeholder=''}) => {
+  const inputClassName = cn(
+    styles.textInput,
+    className,
+  )
   return (
     <div className={styles.textInputContainer}>
       <textarea
-        className={styles.textInput}
+        className={inputClassName}
         value={value}
         onChange={(e) => {
           onChange(e.target.value);

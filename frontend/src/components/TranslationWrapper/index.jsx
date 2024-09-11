@@ -52,8 +52,8 @@ const TranslationBox = observer(() => {
 
   const handleCopy = () => {
     if (translation) {
-      navigator.clipboard.writeText(translation);
-      alert('Текст скопирован в буфер обмена!');
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText)
+        navigator.clipboard.writeText(translation);
     }
   };
 
@@ -87,8 +87,8 @@ const TranslationBox = observer(() => {
     <>
     <div className={styles.translationBox}>
       <div className={styles.header}>
-        <SwapLanguagesButton onClick={handleSwapLanguages} />
         <div className={styles.languageBox}>{languages.from}</div>
+        <SwapLanguagesButton onClick={handleSwapLanguages} />
         <div className={styles.languageBox}>{languages.to}</div>
       </div>
 
