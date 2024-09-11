@@ -1,17 +1,18 @@
 # Ёлымтан
 Ёлымтан - это переводчик с русского на мансийский и наоборот, доступный в качестве веб-страницы.
 
-# Разработка
-Создать файл `.env`:
+# Запуск локально
+Создать файл `.env`, по параметрам указаным в example.env. Параметры:
+- ```URL``` - это url бэкенд модели, куда можно обращаться.
 ```
-cp .env.example .env
-echo URL=<url, где находится бэкенд модели> >> .env
+cp example.env .env
 ```
 
 Запустить `docker compose`:
 ```
 docker compose up
 ```
+Далее запустятся контейнеры с бэкендом и фронтендом. Фронт будет доступен по адресу `http://localhost:3000`, а бэкенд - по адресу `http://localhost:8000`.
 
 # Деплой
 Установить:
@@ -32,17 +33,24 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-Заполнить файл `.env`, а затем запустить `docker compose`:
+Заполнить файл `.env` следующими параметрами:
+- `DOCKER_USERNAME` - логин пользователя, которому принадлежит образа бэкенда. В данном случае это `darrrinka`, так как текущий образ деплоится именно на репозиторий этого пользователя.
+- `DOCKER_IMAGE` - имя образа бэкенда. В данном случае это `translator`.
+- `DOCKER_IMAGE_TAG` - тег образа бэкенда. Может быть `latest` или другим тегом.
+- `DOCKER_FRONTEND_IMAGE` - имя образа фронтенда. В данном случае это `translator-frontend`.
+- `DOCKER_FRONTEND_IMAGE_TAG` - тег образа фронтенда. Может быть `latest` или другим тегом.
+- `URL` - это url бэкенд модели, куда можно обращаться.
+
 ```
-cp example.env .deploy/.env
-
-echo DOCKER_USERNAME=darrrinka > .env
-echo DOCKER_IMAGE=translator > .env
-echo DOCKER_IMAGE_TAG=latest > .env
-echo DOCKER_FRONTEND_IMAGE=translator-frontend > .env
-echo DOCKER_FRONTEND_IMAGE_TAG=latest > .env
-echo URL=<url, где находится бэкенд модели> >> .env
-
+echo DOCKER_USERNAME=darrrinka >> .deploy/.env
+echo DOCKER_IMAGE=translator >> .deploy/.env
+echo DOCKER_IMAGE_TAG=latest >> .deploy/.env
+echo DOCKER_FRONTEND_IMAGE=translator-frontend >> .deploy/.env
+echo DOCKER_FRONTEND_IMAGE_TAG=latest >> .deploy/.env
+echo URL=<url, где находится бэкенд модели> >> .deploy/.env
+```
+Затем можно запустить `docker compose`:
+```
 source .deploy/.env
 
 docker compose -f .deploy/docker-compose.yml up -d
