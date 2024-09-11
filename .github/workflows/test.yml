@@ -29,9 +29,16 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build
+      - name: Build backend
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
+          push: false
+
+      - name: Build frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
           push: false

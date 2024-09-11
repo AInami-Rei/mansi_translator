@@ -1,4 +1,4 @@
-name: Build and Push Docker Image to Docker Hub
+name: Build and Push Docker Images to Docker Hub
 
 on:
   workflow_run:
@@ -14,7 +14,7 @@ env:
 jobs:
 
   build:
-    name: Push Docker image to Docker Hub
+    name: Build and Push Docker images to Docker Hub
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -29,7 +29,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push
+      - name: Build and push backend
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -38,3 +38,14 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}:${{ github.run_number }}
             ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}:latest
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          target: run_prod
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_FRONTEND_IMAGE }}:${{ github.run_number }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_FRONTEND_IMAGE }}:latest
