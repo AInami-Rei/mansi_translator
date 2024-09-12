@@ -1,51 +1,70 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import TextInput from '../TextInput';
 import Keyboard from '../Keyboard';
 import styles from './index.module.scss'
 import SwapLanguagesButton from '../SwapLanguagesButton';
-import { debounce } from 'lodash';
+import { apiService } from '../../apiService';
+
 
 const MAX_CHAR_LIMIT = 250;
 
 const placeholders = {"Русский": "Введите текст", "Мансийский": "Несов текст"}
+const abbreviations = {"Русский": "ru", "Мансийский": "ms"}
 
 const TranslationBox = () => {
   const [inputText, setInputText] = useState('');
   const [translation, setTranslation] = useState('');
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [languages, setLanguages] = useState({
     from: 'Русский',
     to: 'Мансийский'
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const timeoutRef = useRef(null);
 
-  // Функция для перевода текста (заменить на реальный API запрос)
-  const handleTranslate = (text) => {
-    console.log('Запрос на перевод:', text);
-    // Пример результата перевода, который вы могли бы получить от API
-    setTranslation('Павыл ворт унли. Ман вор павылт олэв.');
+  const handleTranslate = async (text) => {
+    setTranslation('');
+    setIsLoading(true);
+    try {
+      const response = await apiService.translate(
+        text,
+        abbreviations[languages.from],
+        abbreviations[languages.to]
+      )
+
+      setTranslation(response.data['text'])
+
+    } catch (error) {
+        console.error('Ошибка:', error);
+      }
+
+    setIsLoading(false);
   };
-
-  const debouncedTranslate = useMemo(() => debounce(handleTranslate, 2000), []);
 
   const handleInputChange = (text) => {
     setInputText(text);
-    if (text.trim()) {
-      debouncedTranslate(text);
-    } else {
-      debouncedTranslate.cancel();
-      setTranslation('');
+    setTranslation('')
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
+
+    timeoutRef.current = setTimeout(() => {
+      handleTranslate(text);
+    }, 1000);
   };
 
   useEffect(() => {
     return () => {
-      debouncedTranslate.cancel();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
-  }, [debouncedTranslate]);
+  }, []);
 
   const handleCopy = () => {
     if (translation) {
-      navigator.clipboard.writeText(translation);
-      alert('Текст скопирован в буфер обмена!');
+      navigator?.clipboard?.writeText(translation);
     }
   };
 
@@ -55,9 +74,11 @@ const TranslationBox = () => {
       to: languages.from
     });
     setTranslation('');
+    setInputText('')
   };
 
   const handleClearInput = () => {
+    setIsLoading(false);
     setInputText('');
     setTranslation('');
   };
@@ -70,11 +91,14 @@ const TranslationBox = () => {
     handleInputChange(inputText.slice(0, -1));
   }
 
+  const onKeyboardClick = () => setIsKeyboardOpen(!isKeyboardOpen)
+
   return (
+    <>
     <div className={styles.translationBox}>
       <div className={styles.header}>
-        <SwapLanguagesButton onClick={handleSwapLanguages} />
         <div className={styles.languageBox}>{languages.from}</div>
+        <SwapLanguagesButton onClick={handleSwapLanguages} />
         <div className={styles.languageBox}>{languages.to}</div>
       </div>
 
@@ -84,6 +108,7 @@ const TranslationBox = () => {
           value={inputText}
           onChange={handleInputChange}
           onClear={handleClearInput}
+          onKeyboardClick={onKeyboardClick}
           charCount={inputText.length}
           maxChars={MAX_CHAR_LIMIT}
           placeholder={placeholders[languages.from]}
@@ -94,15 +119,15 @@ const TranslationBox = () => {
           className={styles.targetLang}
           value={translation}
           onClear={handleCopy}
+          isLoading={isLoading}
         />
       </div>
-
-      <Keyboard
-        isOpen // TODO by button
-        onKeyPress={handleKeyboardKeyPress}
-        onBackspace={handleKeyboardBackspace}
-      />
     </div>
+    {isKeyboardOpen && <Keyboard
+      onKeyPress={handleKeyboardKeyPress}
+      onBackspace={handleKeyboardBackspace}
+    />}
+    </>
   );
 };
 
