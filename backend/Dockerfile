@@ -1,4 +1,4 @@
-FROM python:3.9-slim as builder
+FROM python:3.11-slim as builder
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -24,7 +24,7 @@ RUN poetry config virtualenvs.create false \
 
 COPY src src
 
-FROM python:3.9-slim as runner
+FROM python:3.11-slim as runner
 
 COPY --from=builder /usr/local /usr/local
 COPY --from=builder /app /app
