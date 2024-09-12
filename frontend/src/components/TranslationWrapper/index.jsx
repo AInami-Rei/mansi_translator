@@ -1,16 +1,17 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import TextInput from '../TextInput';
 import Keyboard from '../Keyboard';
 import styles from './index.module.scss'
 import SwapLanguagesButton from '../SwapLanguagesButton';
-import { debounce } from 'lodash';
 import {observer} from 'mobx-react-lite'
 import { useStores } from "../../stores/rootStore";
+import { apiService } from '../../apiService';
 
 
 const MAX_CHAR_LIMIT = 250;
 
 const placeholders = {"Русский": "Введите текст", "Мансийский": "Несов текст"}
+const abbreviations = {"Русский": "ru", "Мансийский": "ms"}
 
 const TranslationBox = observer(() => {
   const [inputText, setInputText] = useState('');
@@ -20,35 +21,49 @@ const TranslationBox = observer(() => {
     to: 'Мансийский'
   });
   const [isLoading, setIsLoading] = useState(false);
+  const timeoutRef = useRef(null);
 
   const {keyboardStore} = useStores()
 
   const handleTranslate = async (text) => {
     setTranslation('');
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    console.log('Запрос на перевод:', text);
-    setTranslation('Павыл ворт унли. Ман вор павылт олэв.');
+    try {
+      const response = await apiService.translate(
+        text, 
+        abbreviations[languages.from],
+        abbreviations[languages.to]
+      )
+
+      setTranslation(response.data['text'])
+
+    } catch (error) {
+        console.error('Ошибка:', error);
+      }
+
     setIsLoading(false);
   };
 
-  const debouncedTranslate = useMemo(() => debounce(handleTranslate, 1000), []);
-
   const handleInputChange = (text) => {
     setInputText(text);
-    if (text.trim()) {
-      debouncedTranslate(text);
-    } else {
-      debouncedTranslate.cancel();
-      setTranslation('');
+    setTranslation('')
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
+
+    timeoutRef.current = setTimeout(() => {
+      handleTranslate(text);
+    }, 1000);
   };
 
   useEffect(() => {
     return () => {
-      debouncedTranslate.cancel();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
-  }, [debouncedTranslate]);
+  }, []);
 
   const handleCopy = () => {
     if (translation) {
@@ -67,7 +82,6 @@ const TranslationBox = observer(() => {
   };
 
   const handleClearInput = () => {
-    debouncedTranslate.cancel();
     setIsLoading(false);
     setInputText('');
     setTranslation('');
