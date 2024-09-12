@@ -19,6 +19,7 @@ services:
       - "8265:${APP_MANAGEMENT_PORT:-8265}"
     volumes:
       - ${DOWNLOAD_DIR:-./data}:/data
+      - /models:/models
     env_file:
       - src/.env
     # command:
