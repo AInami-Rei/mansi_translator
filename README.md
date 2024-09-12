@@ -3,7 +3,7 @@
 
 # Запуск локально
 Создать файл `.env`, по параметрам указаным в example.env. Параметры:
-- ```URL``` - это url бэкенд модели, куда можно обращаться. [Здесь](https://github.com/AInami-Rei/mansi_translator/blob/feature/model-mbart/model_backend/README.md) можно найти информацию по развертыванию модели.
+- ```URL``` - это url бэкенд модели, куда можно обращаться. [Здесь](./model_backend/README.md) можно найти информацию по развертыванию модели.
 ```
 cp example.env .env
 ```
