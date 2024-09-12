@@ -3,8 +3,6 @@ import TextInput from '../TextInput';
 import Keyboard from '../Keyboard';
 import styles from './index.module.scss'
 import SwapLanguagesButton from '../SwapLanguagesButton';
-import {observer} from 'mobx-react-lite'
-import { useStores } from "../../stores/rootStore";
 import { apiService } from '../../apiService';
 
 
@@ -13,9 +11,10 @@ const MAX_CHAR_LIMIT = 250;
 const placeholders = {"Русский": "Введите текст", "Мансийский": "Несов текст"}
 const abbreviations = {"Русский": "ru", "Мансийский": "ms"}
 
-const TranslationBox = observer(() => {
+const TranslationBox = () => {
   const [inputText, setInputText] = useState('');
   const [translation, setTranslation] = useState('');
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [languages, setLanguages] = useState({
     from: 'Русский',
     to: 'Мансийский'
@@ -23,14 +22,12 @@ const TranslationBox = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
   const timeoutRef = useRef(null);
 
-  const {keyboardStore} = useStores()
-
   const handleTranslate = async (text) => {
     setTranslation('');
     setIsLoading(true);
     try {
       const response = await apiService.translate(
-        text, 
+        text,
         abbreviations[languages.from],
         abbreviations[languages.to]
       )
@@ -67,8 +64,7 @@ const TranslationBox = observer(() => {
 
   const handleCopy = () => {
     if (translation) {
-      if (navigator && navigator.clipboard && navigator.clipboard.writeText)
-        navigator.clipboard.writeText(translation);
+      navigator?.clipboard?.writeText(translation);
     }
   };
 
@@ -95,7 +91,7 @@ const TranslationBox = observer(() => {
     handleInputChange(inputText.slice(0, -1));
   }
 
-  const onKeyboardClick = () => keyboardStore.setIsOpen(!keyboardStore.isOpen)
+  const onKeyboardClick = () => setIsKeyboardOpen(!isKeyboardOpen)
 
   return (
     <>
@@ -127,12 +123,12 @@ const TranslationBox = observer(() => {
         />
       </div>
     </div>
-    {keyboardStore.isOpen && <Keyboard
+    {isKeyboardOpen && <Keyboard
       onKeyPress={handleKeyboardKeyPress}
       onBackspace={handleKeyboardBackspace}
     />}
     </>
   );
-});
+};
 
 export default TranslationBox;
