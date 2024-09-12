@@ -1,0 +1,62 @@
+seed_everything: 0
+trainer:
+  accelerator: auto
+  devices: auto
+  strategy: auto
+  accumulate_grad_batches: 1
+  gradient_clip_val: 1.0
+  precision: bf16-mixed
+  gradient_clip_algorithm: norm
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  limit_test_batches: 1.0
+  max_epochs: 10
+  default_root_dir: /share/a.tikhonov/models/checkpoints
+  val_check_interval: 0.1
+  fast_dev_run: False
+  profiler: simple
+  callbacks:
+    - class_path: lightning.pytorch.callbacks.EarlyStopping
+      init_args:
+        patience: 5
+        monitor: val_loss
+        min_delta: 0.001
+        mode: min
+        check_finite: True
+        verbose: True
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        dirpath: !
+        filename: deepseek-coder-1.3b-clonedetection_mean_biattention_xcd_pretrain_poj_ft_inference-{epoch:02d}-{val_loss:.2f}
+        monitor: val_loss
+        save_top_k: 1
+        mode: min
+        verbose: True
+model:
+  class_path: 
+  init_args:
+    model_name_or_path: !
+    task_name: !
+    split_name: test
+    ckpt_path: !
+    add_lora: True
+    grad_cache: False
+    # chunk_size: 12
+    # grad_clip_val: 1.0
+    warmup_ratio: 0.1
+    lora_r: 64
+    lora_alpha: 64
+    learning_rate: 5e-5
+    scheduler_type: linear
+    config_file: /home/ai_talent_hub_hack_2024/mansi_translator/models/configs/mt_test_config.yaml
+data:
+  class_path: !
+  init_args:
+    dataset_class: 
+    train_data_path: 
+    val_data_path: 
+    test_data_path:
+    data_processing: False
+    batch_size: 100
+    num_workers: 16
+    model_max_length: 512
