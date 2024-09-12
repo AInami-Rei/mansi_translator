@@ -62,5 +62,14 @@ docker compose -f .deploy/docker-compose.yml up -d
 
 [Репозиторий с образами фронтенда](https://hub.docker.com/repository/docker/darrrinka/translator-frontend)
 
+Для быстрого обновления положить скрипт в папку пользователя
+на сервере и запускать его с тегом:
+```
+cd ~
+cp mansi_translator/scripts/update.sh .
+chmod +x update.sh
+./update.sh <тег>
+```
+
 # Лицензия
 Этот репозиторий имеет лицензию GPL-2.0. Подробности можно найти в файле [LICENSE](https://github.com/AInami-Rei/mansi_translator/blob/dev/LICENSE).
