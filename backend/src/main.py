@@ -8,15 +8,29 @@ settings = Settings()
 
 @app.get("/healthcheck")
 def healthcheck():
+    """
+    Check whether the app is running
+    :return: app status
+    """
     return {"status": "ok"}
 
 
 def get_settings() -> Settings:
+    """
+    Get app settings
+    :return: settings - app settings
+    """
     return Settings()
 
 
 @app.post("/translate", response_model=TranslateResponse)
 def translate(request: TranslateRequest, settings: Settings = Depends(get_settings)):
+    """
+    Tranlate the requested text
+    :param: request - translate request
+    :param: settings - app settings
+    :return: answer - translate response
+    """
     if request.source_lang == request.target_lang:
         return TranslateResponse(
             text=request.text,
@@ -37,8 +51,3 @@ def translate(request: TranslateRequest, settings: Settings = Depends(get_settin
         target_lang=request.target_lang,
     )
     return answer
-
-
-@app.get("/config")
-def get_config(settings: Settings = settings):
-    return {"TEMPERATURE": settings.temperature, "MODELS": settings.models}
