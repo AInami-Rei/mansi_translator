@@ -62,12 +62,6 @@ const TranslationBox = () => {
     };
   }, []);
 
-  const handleCopy = () => {
-    if (translation) {
-      navigator?.clipboard?.writeText(translation);
-    }
-  };
-
   const handleSwapLanguages = () => {
     setLanguages({
       from: languages.to,
@@ -118,7 +112,6 @@ const TranslationBox = () => {
         <TextInput
           className={styles.targetLang}
           value={translation}
-          onClear={handleCopy}
           isLoading={isLoading}
         />
       </div>

@@ -19,9 +19,14 @@
         background-color: #bbb;
     }
 
-    // @media (max-width:857px) {
-    //     // width: 30px;
-    //     // height: 30px;
-    //     // padding: 2px;
-    // }
+    @media (max-width:857px) {
+        width: 30px;
+        height: 30px;
+        padding: 6px;
+    }
+
+    .swapIcon {
+        width: 20px;
+        color: black;
+    }
 }
