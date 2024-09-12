@@ -50,7 +50,7 @@ docker-compose up -d
 ```
 import requests
 
-url = 'http://127.0.0.1:8000/translate/en-ru'
+url = 'http://127.0.0.1:8000/translate/ru-ms'
 params = {
     'text': 'Привет!'
 }
