@@ -28,7 +28,7 @@ class ApiService {
 
     translate = async (text, src_lang, trg_lang) => {
         return this.axiosInstance
-        .post('translate/', {
+        .post('translate', {
             "text": text, 
             "source_lang": src_lang, 
             "target_lang": trg_lang,
