@@ -59,7 +59,7 @@ class DataModule(L.LightningDataModule):
             model_max_length=self.hparams.model_max_length,
             padding=True,
             truncation=True,
-            use_fast=True
+            use_fast=True,
         )
 
     def _construct_pt_path(self, data_path: str):
@@ -90,10 +90,7 @@ class DataModule(L.LightningDataModule):
     def _process_and_save_dataset(self, pt_path: str, data_path: str):
         """Process the dataset and save it to the specified path."""
         if not os.path.exists(pt_path) or self.hparams.data_processing:
-            dataset = self.dataset_class(
-                file_path=data_path,
-                tokenizer=self.tokenizer
-            )
+            dataset = self.dataset_class(file_path=data_path, tokenizer=self.tokenizer)
             torch.save(dataset, pt_path)
 
     def setup(self, stage: str):

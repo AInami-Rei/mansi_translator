@@ -54,7 +54,7 @@ class MachineTranslationDataset(Dataset):
             lang=second_lang,
             target_flag=True
         )
-        
+
         return {
             "data": data,
             "label": label
@@ -70,7 +70,7 @@ class MachineTranslationDataset(Dataset):
             data.input_ids[data.input_ids == tokenizer.pad_token_id] = -100
 
         return data
-        
+
     def get_non_printing_char_replacer(self, replace_by: str = " "):
         non_printable_map = {
             ord(c): replace_by
@@ -79,10 +79,10 @@ class MachineTranslationDataset(Dataset):
             # see https://www.unicode.org/reports/tr44/#General_Category_Values
             if unicodedata.category(c) in {"C", "Cc", "Cf", "Cs", "Co", "Cn"}
         }
-    
+
         def replace_non_printing_char(line) -> str:
             return line.translate(non_printable_map)
-    
+
         return replace_non_printing_char
 
     def preproc(self, text: list):

@@ -33,7 +33,7 @@ trainer:
         mode: min
         verbose: True
 model:
-  class_path: 
+  class_path:
   init_args:
     model_name_or_path: !
     task_name: !
@@ -52,9 +52,9 @@ model:
 data:
   class_path: !
   init_args:
-    dataset_class: 
-    train_data_path: 
-    val_data_path: 
+    dataset_class:
+    train_data_path:
+    val_data_path:
     test_data_path:
     data_processing: False
     batch_size: 100

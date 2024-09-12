@@ -20,7 +20,7 @@ from transformers import (
 
 try:
     import sacrebleu
-    
+
 except ModuleNotFoundError:
     !pip install sacrebleu -q
     import sacrebleu
@@ -61,7 +61,7 @@ class MachineTranslationModel(L.LightningModule):
 
         tokenizer_model_config = self._configure_model(),
         self.model, self.tokenizer = tokenizer_model_config["model"], tokenizer_model_config["tokenizer"]
-        
+
         self._register_external_params()
 
         self.training_step_outputs = []
@@ -94,7 +94,7 @@ class MachineTranslationModel(L.LightningModule):
         for name, param in self.model.named_parameters():
             self.register_parameter(name.replace(".", "_"), param)
 
-    def _configure_model(self):     
+    def _configure_model(self):
         encoder = AutoModelForSeq2SeqLM.from_pretrained(
             self.hparams.model_name_or_path, torch_dtype=torch.bfloat16
         )
@@ -113,7 +113,7 @@ class MachineTranslationModel(L.LightningModule):
             tokenizer.save_pretrained(f"{self.hparams.tokenizer_path}")
             print(f"Old vocab_size: {len(tokenizer_old)},\nnew vocab size: {len(tokenizer)}")
             added_vocab = set(tokenizer.get_vocab()).difference(set(tokenizer_old.get_vocab()))
-            
+
             model.resize_token_embeddings(len(tokenizer))
             for t in tqdm(added_vocab):
                 tt = tokenizer_old(t, add_special_tokens=False).input_ids
@@ -121,7 +121,7 @@ class MachineTranslationModel(L.LightningModule):
                     tt = [tokenizer_old.unk_token_id]
                 idx = tokenizer.convert_tokens_to_ids(t)
                 model.model.shared.weight.data[idx] = model.model.shared.weight.data[tt].mean(0)
-        
+
         if self.hparams.add_lora:
             encoder = self._apply_lora(encoder)
             encoder = self._load_checkpoint_weights(encoder)
@@ -148,7 +148,7 @@ class MachineTranslationModel(L.LightningModule):
                     {
                         original_states[0]: value
                         for original_states, value in zip(
-                            model.named_parameters(), 
+                            model.named_parameters(),
                             torch.load(ckpt_path)["state_dict"].values(),
                         )
                     }
@@ -199,7 +199,7 @@ class MachineTranslationModel(L.LightningModule):
 
     def test_step(self, batch, batch_idx):
         loss = self.model(**batch["data"], labels=batch["label"].input_ids).loss
-        
+
         self._translate(batch)
         return loss
 
@@ -212,7 +212,7 @@ class MachineTranslationModel(L.LightningModule):
         self.tokenizer.src_lang = src_lang
         self.tokenizer.tgt_lang = tgt_lang
         inputs = self.tokenizer(
-            text, return_tensors='pt', padding=True, truncation=True, 
+            text, return_tensors='pt', padding=True, truncation=True,
             max_length=max_input_length
         )
         result = model.generate(
@@ -324,7 +324,7 @@ class MachineTranslationModel(L.LightningModule):
             iteration=self.global_step,
             value=mans_chrf
         )
-        
+
     def _log_bleu(self, russian_bleu: float, mans_bleu: float):
         self.clearml_logger.report_scalar(
             title="Bleu",

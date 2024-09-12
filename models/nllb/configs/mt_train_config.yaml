@@ -52,9 +52,9 @@ data:
   class_path: mt_data.DataModule
   init_args:
     dataset_class: mt_datasets.MachineTranslationDataset
-    train_data_path: 
-    val_data_path: 
-    test_data_path: 
+    train_data_path:
+    val_data_path:
+    test_data_path:
     spm_trained_path: /home/ai_talent_hub_hack_2024/myv-nmt/spm_nllb_mansi_268k.model
     data_processing: False
     batch_size: 100
