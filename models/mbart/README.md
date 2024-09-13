@@ -1,5 +1,22 @@
 # Обучение модели mbart
 
+Применён подход и реализация, описанная в [статье](https://arxiv.org/pdf/2209.09368)  
+Базовая модель [mbart](https://huggingface.co/facebook/mbart-large-50)
+
+Обучены 2 модели:
+- с мансийского на русский (`notebooks/mans_ru`)
+- с русского на мансийский (`notebooks/ru_mans`)
+и токенизатор `notebooks/tokenizer_train`
+
+Валидация - `notebooks/eval`
+
+# Данные
+Исходный датасет от ЮНИИТ расширен с помощью открытых источников:
+1. [Книга песен](https://ouipiir.ru/sites/default/files/pesni_hulimsunt.pdf)
+2. [Журнал](https://www.khanty-yasang.ru/luima-seripos/no-1-1307)
+3. [Книга песен 2](https://okrlib.ru/sites/default/files/docs/2019/11_05_16_medvezh_i_e_picheskie_pesni_mansi_vogulov_2016-0270.pdf)
+4. [Библия](http://finugorbib.com/bible/mansi/41_Mar01_ru.html)
+
 # Улучшение токенизатора
 - Инициализация весов в токенайзере через разные языки (реализовано сочетание - финский, русский, венгерский)
 - Использовать не только тексты, но и словари для обучения токенизатора
