@@ -3,20 +3,27 @@
 
     .textInput {
         width: 400px;
-        height: 160px;
+        height: 199px;
         padding: 10px;
         border-radius: 0 0 20px 20px;
-        border: none;
-        font-size: 16px;
+        border: 2px solid #152934;
+        font-size: 14pt;
         resize: none;
-        background-color: #EAEAEA;
+        background-color: #FFF9ED;
         padding: 12px 15px;
+        color: #152934;
+        box-shadow: 4px 4px #152934;
 
         &:disabled {
-            background-color: #EAEAEA;
+            background-color: #FFF9ED;
             color: inherit;
         }
-        
+
+        @media (max-width: 857px) {
+            flex-direction: column;
+            border: none;
+            width:80vw;
+        }
 
         @media (max-width: 452px) {
             flex-direction: column;
@@ -26,18 +33,19 @@
 
     .charCount {
         position: absolute;
-        bottom: 15px;
-        left: 15px;
+        bottom: 20px;
+        left: 20px;
         font-size: 13px;
         font-weight: 590;
-        color: #888;
+        color: black;
+        opacity: 60%;
     }
 
     .clearBtn {
         background: none;
         position: absolute;
-        top: 12px;
-        right: 15px;
+        top: 15px;
+        right: 20px;
         border: none;
         cursor: pointer;
         font-size: 15pt;
@@ -48,14 +56,14 @@
     .copyBtn {
         background: none;
         position: absolute;
-        top: 12px;
-        right: 15px;
+        top: 15px;
+        right: 20px;
         border: none;
         cursor: pointer;
 
         .copyIcon {
-            width: 15px;
-            height: 15px;
+            width: 20px;
+            height: 20px;
         }
 
         &:hover {
@@ -68,12 +76,11 @@
     }
 
     .keyboardBtn {
-        width: 25px;
-        // height: 10px;
+        width: 30px;
         position: absolute;
         cursor: pointer;
-        bottom: 15px;
-        right: 15px;
+        bottom: 20px;
+        right: 20px;
     }
 
     .loader {
