@@ -50,7 +50,7 @@ const TranslationBox = () => {
     }
 
     timeoutRef.current = setTimeout(() => {
-      handleTranslate(text);
+      text.trim() && handleTranslate(text);
     }, 1000);
   };
 

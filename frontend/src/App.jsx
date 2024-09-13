@@ -1,7 +1,7 @@
 import React from 'react';
 import TranslationWrapper from './components/TranslationWrapper';
 import styles from './index.module.scss'
-import logo from './assets/logo (2).svg'
+import logo from './assets/mini_logo.svg'
 
 const App = () => {
   return (
