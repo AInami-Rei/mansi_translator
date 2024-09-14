@@ -11,6 +11,9 @@ class MyLightningCLI(LightningCLI):
             "model.init_args.model_name_or_path", "data.init_args.model_name_or_path"
         )
         parser.link_arguments("model.init_args.ckpt_path", "data.init_args.ckpt_path")
+        parser.link_arguments("model.init_args.trained_spm_path", "data.init_args.trained_spm_path")
+        parser.link_arguments("data.init_args.model_max_length", "model.init_args.model_max_length")
+        
 
 
 if __name__ == "__main__":

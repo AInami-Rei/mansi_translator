@@ -1,9 +1,8 @@
-from modeling_llama import UnmaskingLlamaModel
-from metrics import mean_average_precision_dp, n_pair_contrastive_loss
-
 import os
 from typing import Optional
 from collections import OrderedDict
+
+from tqdm import tqdm
 
 import clearml
 
@@ -15,16 +14,14 @@ import transformers
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoModel,
+    AutoTokenizer,
+    NllbTokenizer,
     get_scheduler,
 )
 
-try:
-    import sacrebleu
+from transformers.optimization import Adafactor
 
-except ModuleNotFoundError:
-    !pip install sacrebleu -q
-    import sacrebleu
-
+import sacrebleu
 
 class MachineTranslationModel(L.LightningModule):
     def __init__(
@@ -34,6 +31,7 @@ class MachineTranslationModel(L.LightningModule):
         task_name: str,
         split_name: str,
         tokenizer_path: str,
+        trained_spm_path: str,
         embed_resizing: bool = False,
         add_lora: bool = True,
         ckpt_path: Optional[str] = None,
@@ -48,7 +46,7 @@ class MachineTranslationModel(L.LightningModule):
     ):
         super().__init__()
         self.save_hyperparameters(
-            ignore=["project_name", "task_name", "config_file"]
+            ignore=["project_name", "task_name", "config_file", "_class_path"]
         )
 
         self.clearml_logger = self._init_clearml_task(
@@ -59,7 +57,7 @@ class MachineTranslationModel(L.LightningModule):
             split_name,
         )
 
-        tokenizer_model_config = self._configure_model(),
+        tokenizer_model_config = self._configure_model()
         self.model, self.tokenizer = tokenizer_model_config["model"], tokenizer_model_config["tokenizer"]
 
         self._register_external_params()
@@ -67,7 +65,7 @@ class MachineTranslationModel(L.LightningModule):
         self.training_step_outputs = []
         self.validation_step_outputs = []
         self.ru = []
-        self.mansi = []
+        self.mans = []
         self.rus_translated = []
         self.mansi_translated = []
 
@@ -75,7 +73,6 @@ class MachineTranslationModel(L.LightningModule):
         self,
         project_name,
         task_name,
-        output_uri,
         config_file,
         model_name_or_path,
         split_name,
@@ -94,23 +91,23 @@ class MachineTranslationModel(L.LightningModule):
         for name, param in self.model.named_parameters():
             self.register_parameter(name.replace(".", "_"), param)
 
-    def _configure_model(self):
-        encoder = AutoModelForSeq2SeqLM.from_pretrained(
+    
+    def _configure_model(self):     
+        model = AutoModelForSeq2SeqLM.from_pretrained(
             self.hparams.model_name_or_path, torch_dtype=torch.bfloat16
         )
         if self.hparams.embed_resizing:
             tokenizer_old = AutoTokenizer.from_pretrained(
                 self.hparams.model_name_or_path
             )
-            tokenizer = AutoTokenizer.from_pretrained(
+            tokenizer = NllbTokenizer.from_pretrained(
                 self.hparams.model_name_or_path,
                 vocab_file=self.hparams.trained_spm_path,
-                model_max_length=self.hparams.model_max_length,
-                padding_side="left",
-                add_eos_token=True,
-                use_fast=True,
+                return_tensors="pt",
+                model_max_length=512,
+                padding=True,
+                truncation=True
             )
-            tokenizer.save_pretrained(f"{self.hparams.tokenizer_path}")
             print(f"Old vocab_size: {len(tokenizer_old)},\nnew vocab size: {len(tokenizer)}")
             added_vocab = set(tokenizer.get_vocab()).difference(set(tokenizer_old.get_vocab()))
 
@@ -122,13 +119,23 @@ class MachineTranslationModel(L.LightningModule):
                 idx = tokenizer.convert_tokens_to_ids(t)
                 model.model.shared.weight.data[idx] = model.model.shared.weight.data[tt].mean(0)
 
+        else:
+            tokenizer = NllbTokenizer.from_pretrained(
+                self.hparams.model_name_or_path,
+                vocab_file=self.hparams.trained_spm_path,
+                return_tensors="pt",
+                model_max_length=512,
+                padding=True,
+                truncation=True
+            )
+            
         if self.hparams.add_lora:
-            encoder = self._apply_lora(encoder)
-            encoder = self._load_checkpoint_weights(encoder)
-            encoder.print_trainable_parameters()
+            model = self._apply_lora(model)
+            model = self._load_checkpoint_weights(model)
+            model.print_trainable_parameters()
 
         return {
-            "model": encoder,
+            "model": model,
             "tokenizer": tokenizer
         }
 
@@ -184,13 +191,27 @@ class MachineTranslationModel(L.LightningModule):
         return total_norm
 
     def training_step(self, batch, batch_idx):
-        loss = self.model(**batch["data"], labels=batch["label"].input_ids).loss
+        batch_size = batch["data"].input_ids.shape[0]
+
+        reshaped_batch = {
+            key: {matrix_key: value.view(batch_size, -1) for matrix_key, value in matrix.items()}
+            for key, matrix in batch.items() if key in ["data", "label"]
+        }
+        
+        loss = self.model(**reshaped_batch["data"], labels=reshaped_batch["label"]["input_ids"]).loss
         self.training_step_outputs.append(loss.item())
         self._log_metrics(batch_idx, loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        loss = self.model(**batch["data"], labels=batch["label"].input_ids).loss
+        batch_size = batch["data"].input_ids.shape[0]
+
+        reshaped_batch = {
+            key: {matrix_key: value.view(batch_size, -1) for matrix_key, value in matrix.items()}
+            for key, matrix in batch.items() if key in ["data", "label"]
+        }
+        
+        loss = self.model(**reshaped_batch["data"], labels=reshaped_batch["label"]["input_ids"]).loss
         self.validation_step_outputs.append(loss.item())
         self.log(
             "val_loss", loss, sync_dist=True, prog_bar=True, add_dataloader_idx=True
@@ -198,30 +219,36 @@ class MachineTranslationModel(L.LightningModule):
         return loss
 
     def test_step(self, batch, batch_idx):
-        loss = self.model(**batch["data"], labels=batch["label"].input_ids).loss
+        batch_size = batch["data"].input_ids.shape[0]
 
-        self._translate(batch)
+        reshaped_batch = {
+            key: {matrix_key: value.view(batch_size, -1) for matrix_key, value in matrix.items()}
+            for key, matrix in batch.items() if key in ["data", "label"]
+        }
+        
+        loss = self.model(**reshaped_batch["data"], labels=reshaped_batch["label"]["input_ids"]).loss
+        # self._store_test_step_outputs(batch)
+
         return loss
 
     def _translate(
-        self,
-        text, src_lang='rus_Cyrl', tgt_lang='eng_Latn',
-        a=32, b=3, max_input_length=1024, num_beams=4, **kwargs
+        text, src_lang='rus_Cyrl', tgt_lang='kaz_Cyrl', 
+        a=32, b=3, max_input_length=512, num_beams=4, **kwargs
     ):
         """Turn a text or a list of texts into a list of translations"""
-        self.tokenizer.src_lang = src_lang
-        self.tokenizer.tgt_lang = tgt_lang
+        tokenizer.src_lang = src_lang
+        tokenizer.tgt_lang = tgt_lang
         inputs = self.tokenizer(
-            text, return_tensors='pt', padding=True, truncation=True,
-            max_length=max_input_length
+            text, return_tensors='pt', padding=True, truncation=True, 
+            max_length=512
         )
-        result = model.generate(
-            **inputs
+        result = self.model.generate(
+            **inputs.to(model.device),
             forced_bos_token_id=tokenizer.convert_tokens_to_ids(tgt_lang),
             max_new_tokens=int(a + b * inputs.input_ids.shape[1]),
             num_beams=num_beams, **kwargs
         )
-        return self.tokenizer.batch_decode(result, skip_special_tokens=True)
+        return tokenizer.batch_decode(result, skip_special_tokens=True)
 
     def _log_metrics(self, batch_idx, loss):
         lr = self.trainer.lr_scheduler_configs[0].scheduler.optimizer.param_groups[0][
@@ -241,20 +268,32 @@ class MachineTranslationModel(L.LightningModule):
             value=loss.item(),
         )
         self.clearml_logger.report_scalar(
-            title="Temperature rate",
-            series="temperature",
-            iteration=self.global_step,
-            value=self._get_temperature_step(batch_idx),
-        )
-        self.clearml_logger.report_scalar(
             title="Batch Loss",
             series="grad_norm",
             iteration=self.global_step,
             value=self._compute_grad_norm(),
         )
 
-    def _store_test_step_outputs(self, embeddings, labels):
-        pass
+    # def _store_test_step_outputs(self, batch: dict):
+    #     if batch["first_lang"] == "ru":
+    #         self.ru.append(batch["data_text"])
+    #         self.mans.append(batch["label_text"])
+    #         self.mansi_translated.append(self._translate(batch["data_text"],
+    #                                                      src_lang=batch["first_lang_tag"],
+    #                                                      tgt_lang=batch["second_lang_tag"]))
+    #         self.rus_translated.append(self._transalte(batch["label_text"],
+    #                                                    src_lang=batch["second_lang_tag"],
+    #                                                    tgt_lang=batch["first_lang_tag"]))
+
+    #     else:
+    #         self.ru.append(batch["label_text"])
+    #         self.mans.append(batch["data_text"])
+    #         self.mansi_translated.append(self._translate(batch["label_text"],
+    #                                                      src_lang=batch["second_lang_tag"],
+    #                                                      tgt_lang=batch["first_lang_tag"]))
+    #         self.rus_translated.append(self._transalte(batch["data_text"],
+    #                                                    src_lang=batch["first_lang_tag"],
+    #                                                    tgt_lang=batch["second_lang_tag"]))
 
     def on_train_epoch_end(self) -> None:
         mean_loss = sum(self.training_step_outputs) / len(self.training_step_outputs)
@@ -298,17 +337,17 @@ class MachineTranslationModel(L.LightningModule):
         chrf_calc = sacrebleu.CHRF(word_order=2)  # this metric is called ChrF++
 
         self._log_chrf(
-            russian_chrf=chrf_calc.corpus_score(self.rus_translated, [self.ru),
-            mans_chrf=chrf_calc.corpus_score(self.mansi_translated, [self.mansi]))
+            russian_chrf=chrf_calc.corpus_score(self.rus_translated, [self.ru]),
+            mans_chrf=chrf_calc.corpus_score(self.mansi_translated, [self.mans])
         )
         self._log_bleu(
             russian_bleu=bleu_calc.corpus_score(self.rus_translated, [self.ru]),
-            mansi_bleu=bleu_calc.corpus_score(self.mansi_translated, [self.mansi]))
+            mansi_bleu=bleu_calc.corpus_score(self.mansi_translated, [self.mans])
         )
 
         self.ru.clear()
         self.rus_translated.clear()
-        self.mansi.clear()
+        self.mans.clear()
         self.mansi_translated.clear()
 
     def _log_chrf(self, russian_chrf: float, mans_chrf: float):
@@ -340,8 +379,12 @@ class MachineTranslationModel(L.LightningModule):
         )
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(
-            self.model.parameters(), lr=self.hparams.learning_rate
+        optimizer = Adafactor(
+            [p for p in self.model.parameters() if p.requires_grad],
+            scale_parameter=False,
+            relative_step=False,
+            lr=self.hparams.learning_rate,
+            weight_decay=1e-3,
         )
         num_training_steps = self.trainer.estimated_stepping_batches
         warmup_steps = int(num_training_steps * self.hparams.warmup_ratio)
