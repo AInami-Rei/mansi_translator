@@ -227,7 +227,7 @@ class MachineTranslationModel(L.LightningModule):
         }
         
         loss = self.model(**reshaped_batch["data"], labels=reshaped_batch["label"]["input_ids"]).loss
-        self._store_test_step_outputs(batch)
+        # self._store_test_step_outputs(batch)
 
         return loss
 
@@ -274,31 +274,26 @@ class MachineTranslationModel(L.LightningModule):
             value=self._compute_grad_norm(),
         )
 
-    def _store_test_step_outputs(self, batch: dict):
-        if batch["first_lang"] == "ru":
-            print("im here at ru")
-            self.ru.append(batch["data_text"])
-            self.mans.append(batch["label_text"])
-            self.mansi_translated.append(self._translate(batch["data_text"],
-                                                         src_lang=batch["first_lang_tag"],
-                                                         tgt_lang=batch["second_lang_tag"]))
-            self.rus_translated.append(self._transalte(batch["label_text"],
-                                                       src_lang=batch["second_lang_tag"],
-                                                       tgt_lang=batch["first_lang_tag"]))
+    # def _store_test_step_outputs(self, batch: dict):
+    #     if batch["first_lang"] == "ru":
+    #         self.ru.append(batch["data_text"])
+    #         self.mans.append(batch["label_text"])
+    #         self.mansi_translated.append(self._translate(batch["data_text"],
+    #                                                      src_lang=batch["first_lang_tag"],
+    #                                                      tgt_lang=batch["second_lang_tag"]))
+    #         self.rus_translated.append(self._transalte(batch["label_text"],
+    #                                                    src_lang=batch["second_lang_tag"],
+    #                                                    tgt_lang=batch["first_lang_tag"]))
 
-        else:
-            print("im here at mans")
-            self.ru.append(batch["label_text"])
-            self.mans.append(batch["data_text"])
-            print(batch["label_text"])
-            print(batch["second_lang_tag"])
-            print(batch["first_lang_tag"])
-            self.mansi_translated.append(self._translate(batch["label_text"],
-                                                         src_lang=batch["second_lang_tag"],
-                                                         tgt_lang=batch["first_lang_tag"]))
-            self.rus_translated.append(self._transalte(batch["data_text"],
-                                                       src_lang=batch["first_lang_tag"],
-                                                       tgt_lang=batch["second_lang_tag"]))
+    #     else:
+    #         self.ru.append(batch["label_text"])
+    #         self.mans.append(batch["data_text"])
+    #         self.mansi_translated.append(self._translate(batch["label_text"],
+    #                                                      src_lang=batch["second_lang_tag"],
+    #                                                      tgt_lang=batch["first_lang_tag"]))
+    #         self.rus_translated.append(self._transalte(batch["data_text"],
+    #                                                    src_lang=batch["first_lang_tag"],
+    #                                                    tgt_lang=batch["second_lang_tag"]))
 
     def on_train_epoch_end(self) -> None:
         mean_loss = sum(self.training_step_outputs) / len(self.training_step_outputs)
