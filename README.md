@@ -5,7 +5,7 @@
 Создать файл `.env`, по параметрам указаным в example.env. Параметры:
 - ```URL``` - это url бэкенд модели, куда можно обращаться. [Здесь](./model_backend/README.md) можно найти информацию по развертыванию модели.
 ```
-cp example.env .env
+cp backend/example.env .env
 ```
 
 Запустить `docker compose`:
