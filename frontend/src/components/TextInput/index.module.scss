@@ -1,0 +1,103 @@
+.textInputContainer {
+    position: relative;
+
+    .textInput {
+        width: 400px;
+        height: 199px;
+        padding: 10px;
+        border-radius: 0 0 20px 20px;
+        border: 2px solid #152934;
+        font-size: 14pt;
+        resize: none;
+        background-color: #FFF9ED;
+        padding: 12px 15px;
+        color: #152934;
+        box-shadow: 4px 4px #152934;
+
+        &:disabled {
+            background-color: #FFF9ED;
+            color: inherit;
+        }
+
+        @media (max-width: 857px) {
+            flex-direction: column;
+            border: none;
+            width:80vw;
+        }
+
+        @media (max-width: 452px) {
+            flex-direction: column;
+            width:80vw;
+        }
+    }
+
+    .charCount {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        font-size: 13px;
+        font-weight: 590;
+        color: black;
+        opacity: 60%;
+    }
+
+    .clearBtn {
+        background: none;
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        border: none;
+        cursor: pointer;
+        font-size: 15pt;
+        font-weight: bold;
+        color: #575555;
+    }
+
+    .copyBtn {
+        background: none;
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        border: none;
+        cursor: pointer;
+
+        .copyIcon {
+            width: 20px;
+            height: 20px;
+        }
+
+        &:hover {
+            opacity: 70%;
+        }
+
+        &:active {
+            opacity: 90%;
+        }
+    }
+
+    .keyboardBtn {
+        width: 30px;
+        position: absolute;
+        cursor: pointer;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 30px;
+        animation: spin 2s linear infinite;
+    }
+}
+
+@keyframes spin {
+    0% {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }

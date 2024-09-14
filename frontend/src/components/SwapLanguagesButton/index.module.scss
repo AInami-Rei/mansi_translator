@@ -1,0 +1,35 @@
+.swapBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position:absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width:40px;
+    height: 40px;
+    background-color: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+
+    .swapIcon {
+        width: 16px;
+        color: #2F2F45;
+        font-weight: bold;
+    }
+
+    @media (max-width:857px) {
+        width: 30px;
+        height: 30px;
+
+        .swapIcon {
+            width: 16px;
+            font-weight: bold;
+        }
+
+        .swapIconPath {
+            stroke: white;
+        }
+    }
+}

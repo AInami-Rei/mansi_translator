@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  translator:
+    container_name: translator
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    ports:
+      - "8000:${APP_PORT:-8000}"
+      - "8265:${APP_MANAGEMENT_PORT:-8265}"
+    volumes:
+      - ${DOWNLOAD_DIR:-./data}:/data
+      - /models:/models
+    env_file:
+      - src/.env
+    # command:
+    #   - "serve"
+    #   - "run"
+    #   - "app:translator_app"

@@ -1,0 +1,64 @@
+.translationBox {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    .header {
+        display: flex;
+        gap: 45px;
+        justify-content: space-between;
+        align-items: center;
+        position:relative;
+
+        @media (max-width: 857px) {
+            flex-direction: row;
+            gap: 0;
+            background-color: #152934;
+            border-radius: 20px 20px 0 0 ;
+          }
+
+        .languageBox {
+            font-size: 15px;
+            text-align: center;
+            width: 400px;
+            border-radius: 20px 20px 0 0 ;
+            padding: 10px 40px;
+            background-color: #152934;
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 4px 4px #152934;
+
+            @media (max-width: 857px) {
+                flex-direction: column;
+                width:50%;
+              }
+
+            @media (max-width: 452px) {
+                padding: 10px 30px;
+            }
+        }
+    }
+
+    .content {
+        display: flex;
+        gap: 45px;
+
+        @media (max-width: 857px) {
+            flex-direction: column;
+            gap: 0;
+            border-radius: 0 0 20px 20px;
+            border: 2px solid #152934;
+            box-shadow: 4px 4px #152934;
+
+            .sourceLang {
+                border-radius: 0;
+                border-bottom: 2px solid #ACB8BB;
+                box-shadow: 6px 0px #152934
+            }
+
+            .targetLang {
+                box-shadow: none;
+            }
+          }
+    }
+  }
