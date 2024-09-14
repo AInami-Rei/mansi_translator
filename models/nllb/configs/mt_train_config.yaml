@@ -35,28 +35,37 @@ trainer:
 model:
   class_path: mt_model.MachineTranslationModel
   init_args:
-    model_name_or_path: facebook/nllb-200-distilled-600M
-    task_name: NLLB600M_full_finetune_main_mansi_corpus
+    model_name_or_path: facebook/nllb-200-3.3B
+    task_name: NLLB3.3b_lora_main_mansi_corpus
     split_name: train
     embed_resizing: True
     tokenizer_path: /home/ai_talent_hub_hack_2024/checkpoints/nllb_ft_tokenizer-rus-mans
-    # ckpt_path: !
-    add_lora: False
+    trained_spm_path: /home/ai_talent_hub_hack_2024/myv-nmt/spm_nllb_mansi_268k.model
+    # ckpt_path:
+    add_lora: True
     warmup_ratio: 0.1
-    lora_r: 64
-    lora_alpha: 64
-    learning_rate: 5e-5
-    scheduler_type: linear
+    lora_r: 128
+    lora_alpha: 128
+    learning_rate: 1e-4
+    scheduler_type: constant_with_warmup
     config_file: /home/ai_talent_hub_hack_2024/mansi_translator/models/configs/mt_train_config.yaml
 data:
   class_path: mt_data.DataModule
   init_args:
     dataset_class: mt_datasets.MachineTranslationDataset
+<<<<<<< HEAD:models/nllb/configs/mt_train_config.yaml
     train_data_path:
     val_data_path:
     test_data_path:
     spm_trained_path: /home/ai_talent_hub_hack_2024/myv-nmt/spm_nllb_mansi_268k.model
     data_processing: False
     batch_size: 100
+=======
+    train_data_path: /home/ai_talent_hub_hack_2024/train_data.csv
+    val_data_path: /home/ai_talent_hub_hack_2024/val_data.csv
+    test_data_path: /home/ai_talent_hub_hack_2024/test_data.csv
+    data_processing: True
+    batch_size: 4
+>>>>>>> e6e7d92 (models/__pycache__):models/configs/mt_train_config.yaml
     num_workers: 16
     model_max_length: 512

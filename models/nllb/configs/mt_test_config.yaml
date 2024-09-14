@@ -26,8 +26,8 @@ trainer:
         verbose: True
     - class_path: lightning.pytorch.callbacks.ModelCheckpoint
       init_args:
-        dirpath: !
-        filename: deepseek-coder-1.3b-clonedetection_mean_biattention_xcd_pretrain_poj_ft_inference-{epoch:02d}-{val_loss:.2f}
+        # dirpath: !
+        # filename: !
         monitor: val_loss
         save_top_k: 1
         mode: min
@@ -40,9 +40,6 @@ model:
     split_name: test
     ckpt_path: !
     add_lora: True
-    grad_cache: False
-    # chunk_size: 12
-    # grad_clip_val: 1.0
     warmup_ratio: 0.1
     lora_r: 64
     lora_alpha: 64

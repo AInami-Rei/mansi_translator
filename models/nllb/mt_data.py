@@ -14,26 +14,26 @@ import torch
 import lightning as L
 from torch.utils.data import DataLoader
 
-from transformers import AutoTokenizer
+from transformers import NllbTokenizer
 
 
 class DataModule(L.LightningDataModule):
     def __init__(
         self,
+        dataset_class: str,
         train_data_path: str,
         val_data_path: str,
         test_data_path: str,
         model_name_or_path: str,
-        model_max_length: int,
-        data_processing: bool,
         batch_size: int,
-        num_workers: int,
-        dataset_class: str,
-        ckpt_path: str,
         trained_spm_path: str,
+        data_processing: bool = False,
+        model_max_length: int = 512,
+        num_workers: int = 16,
+        ckpt_path: str = None,
     ):
         super().__init__()
-        self.save_hyperparameters(ignore=["tokenizer", "dataset_class"])
+        self.save_hyperparameters(ignore=["dataset_class"])
 
         self.tokenizer = self._initialize_tokenizer(model_name_or_path)
         self.dataset_class = self._get_class_from_string(dataset_class)
@@ -53,20 +53,19 @@ class DataModule(L.LightningDataModule):
             if (self.hparams.ckpt_path and os.path.isdir(self.hparams.ckpt_path))
             else model_name_or_path
         )
-        return AutoTokenizer.from_pretrained(
+        return NllbTokenizer.from_pretrained(
             tokenizer_path,
             vocab_file=self.hparams.trained_spm_path,
-            model_max_length=self.hparams.model_max_length,
-            padding=True,
-            truncation=True,
-            use_fast=True,
+            model_max_length=512,
+            padding="max_length",
+            truncation=True
         )
 
     def _construct_pt_path(self, data_path: str):
         """Construct the path for the processed dataset."""
         model_name_or_path = self.hparams.model_name_or_path.replace("/", "_")
         return data_path.replace(
-            ".jsonl",
+            ".csv",
             f"_{model_name_or_path}_{self.hparams.model_max_length}.pt",
         )
 
